@@ -16,14 +16,31 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Get API key from environment variable
-groq_api_key = os.getenv("GROQ_API_KEY", "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")
+groq_api_key = os.getenv("GROQ_API_KEY")
 api_url = "https://api.groq.com/openai/v1/chat/completions"
 
 # Configure Tesseract path based on environment
 if os.name == 'nt':  # Windows
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 else:  # Linux/Unix
-    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+    # Try to find tesseract in common locations
+    tesseract_paths = [
+        '/usr/bin/tesseract',
+        '/usr/local/bin/tesseract',
+        '/opt/homebrew/bin/tesseract'  # For macOS
+    ]
+    
+    for path in tesseract_paths:
+        if os.path.exists(path):
+            pytesseract.pytesseract.tesseract_cmd = path
+            break
+    else:
+        # If not found in common locations, use the default
+        pytesseract.pytesseract.tesseract_cmd = 'tesseract'
+
+# Set Tesseract data path if provided in environment
+if 'TESSDATA_PREFIX' in os.environ:
+    os.environ['TESSDATA_PREFIX'] = os.environ['TESSDATA_PREFIX']
 
 # Available languages in Tesseract
 TESSERACT_LANGUAGES = {
