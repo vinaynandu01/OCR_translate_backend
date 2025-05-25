@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Get API key from environment variable
-groq_api_key = os.getenv("GROQ_API_KEY")
+groq_api_key = os.getenv("GROQ_API_KEY", "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")
 api_url = "https://api.groq.com/openai/v1/chat/completions"
 
 # Configure Tesseract path based on environment
@@ -121,6 +121,19 @@ def translate_text(text, target_lang):
     except Exception as e:
         app.logger.error(f"Translation error: {str(e)}")
         return f"Error: {str(e)}"
+
+@app.route("/", methods=["GET"])
+def root():
+    return jsonify({
+        "status": "running",
+        "message": "OCR Translation API is running",
+        "endpoints": {
+            "languages": "/languages",
+            "translate_text": "/translate/text",
+            "translate_image": "/translate/image",
+            "health": "/health"
+        }
+    })
 
 @app.route("/languages", methods=["GET"])
 def get_languages():
